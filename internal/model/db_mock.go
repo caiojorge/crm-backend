@@ -1,7 +1,7 @@
-package infra
+package model
 
 import (
-	"github.com/caiojorge/crm-backend/internal/model"
+	"fmt"
 	"github.com/google/uuid"
 	"sync"
 )
@@ -9,54 +9,63 @@ import (
 // MockDatabase represents the mock database using a map and a mutex.
 type MockDatabase struct {
 	mu        sync.Mutex
-	customers map[uuid.UUID]model.Customer
+	customers map[uuid.UUID]Customer
 }
 
+// NewMockDatabase creates a new MockDatabase.
 func NewMockDatabase() *MockDatabase {
 	return &MockDatabase{
-		customers: make(map[uuid.UUID]model.Customer),
+		customers: make(map[uuid.UUID]Customer),
 	}
 }
 
-func (db *MockDatabase) Create(customer model.Customer) bool {
+// Create creates a new customer.
+func (db *MockDatabase) Create(customer *Customer) bool {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	if _, exists := db.customers[customer.ID]; exists {
 		return false
 	}
-	db.customers[customer.ID] = customer
+	_customer := *customer
+	db.customers[customer.ID] = _customer
+	fmt.Println("Created customer", customer.ID)
 	return true
 }
 
-func (db *MockDatabase) Read(id uuid.UUID) (model.Customer, bool) {
+// Read reads a customer by id.
+func (db *MockDatabase) Read(id uuid.UUID) (Customer, bool) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	customer, exists := db.customers[id]
 	return customer, exists
 }
 
-func (db *MockDatabase) ListAll() []model.Customer {
+// ListAll lists all customers.
+func (db *MockDatabase) ListAll() []Customer {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	var all []model.Customer
+	var all []Customer
 	for _, customer := range db.customers {
 		all = append(all, customer)
 	}
 	return all
 }
 
-func (db *MockDatabase) Update(id uuid.UUID, customer model.Customer) bool {
+// Update updates a customer by id.
+func (db *MockDatabase) Update(id uuid.UUID, customer *Customer) bool {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
+	fmt.Println("Updating customer", id, "with", customer)
 	if _, exists := db.customers[id]; !exists {
 		return false
 	}
-	db.customers[id] = customer
+	_customer := *customer
+	db.customers[id] = _customer
 	return true
 }
 
+// Delete deletes a customer by id.
 func (db *MockDatabase) Delete(id uuid.UUID) bool {
 	db.mu.Lock()
 	defer db.mu.Unlock()
