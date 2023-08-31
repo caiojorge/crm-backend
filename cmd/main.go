@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/caiojorge/crm-backend/handler"
 	"github.com/caiojorge/crm-backend/internal/model"
-	"net/http"
 
 	// Import the third-party gorilla/mux package
 	"github.com/gorilla/mux"
@@ -35,9 +36,6 @@ func main() {
 	// Instantiate a new router by invoking the "NewRouter" handler
 	router := mux.NewRouter()
 
-	// Serve static files from the 'static' directory
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
-
 	// Rather calling http.HandleFunc, call the equivalent router.HandleFunc
 	// This gives us access to method-based routing
 	router.HandleFunc("/crm/api/v1/dictionary", getDictionary).Methods("GET")
@@ -46,6 +44,8 @@ func main() {
 	router.HandleFunc("/crm/api/v1/customer", handler.CreateCustomer).Methods("POST")
 	router.HandleFunc("/crm/api/v1/customer/{id}", handler.UpdateCustomer).Methods("PUT")
 	router.HandleFunc("/crm/api/v1/customer/{id}", handler.DeleteCustomer).Methods("DELETE")
+	// Serve static files from the 'static' directory
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
 	fmt.Println("Server is starting on port 3000...")
 	// The second argument for "ListenAndServe" was previously nil
